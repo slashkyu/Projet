@@ -5,6 +5,7 @@
 #include <sys/mman.h>
 #include <elf.h>
 
+// Vérification des 4 premiers octets du nombre magique ("7f 45 4c 46")
 int check_elf(Elf32_Ehdr * data)
 {
   
@@ -17,6 +18,7 @@ int check_elf(Elf32_Ehdr * data)
   return (0);
 }
 
+// Vérification de l'architecture 32bits
 int check_arch(Elf32_Ehdr * data)
 {
   if (data->e_ident[EI_CLASS] != 1)
@@ -25,6 +27,7 @@ int check_arch(Elf32_Ehdr * data)
   return (0);
 }
 
+// Procédure d'affichage des infos du header ELF
 void print_info(Elf32_Ehdr * data)
 {
 	int i;
@@ -44,7 +47,7 @@ void print_info(Elf32_Ehdr * data)
 		puts("  Données:                            système à octets de poids fort d'abord (big endian)");
 
 	printf("  Version:                            %x\n", data->e_ident[6]);
-	printf("  OS/ABI:                             %d\n", data->e_ident[7]);// switch case
+	printf("  OS/ABI:                             %d\n", data->e_ident[7]);
 	printf("  Version ABI:                        %d\n", data->e_ident[8]);
 
 	printf("  Type:                               ");
@@ -75,84 +78,49 @@ void print_info(Elf32_Ehdr * data)
 
 int main(int argc, char *argv[])
 {
-  //int fd;
-  Elf32_Ehdr *data;
-  //struct stat file_infos;
-	///////////////////////////////////////////////////////
+	Elf32_Ehdr *data;
 	char err_args [] = "USAGE: executable <binary_file>";
 	char err_open [] = "Ouverture du fichier impossible";
 	char err_rec [] = "Recuperation des informations du fichier impossible";
 	char err_mem [] = "Chargement du fichier en memoire impossible";
-	char err_elf [] = "Pas format propre";
-	char err_arch [] = "Mauvais architecture";
-	//struct stat { 
-        //       dev_t     st_dev;     /* ID of device containing file */ 
-        //       ino_t     st_ino;     /* inode number */ 
-        //       mode_t    st_mode;    /* protection */ 
-        //       nlink_t   st_nlink;   /* number of hard links */ 
-        //       uid_t     st_uid;     /* user ID of owner */ 
-        //       gid_t     st_gid;     /* group ID of owner */ 
-        //       dev_t     st_rdev;    /* device ID (if special file) */ 
-        //       off_t     st_size;    /* total size, in bytes */ 
-        //       blksize_t st_blksize; /* blocksize for file system I/O */ 
-        //       blkcnt_t  st_blocks;  /* number of 512B blocks allocated */ 
-        //       time_t    st_atime;   /* time of last access */ 
-        //       time_t    st_mtime;   /* time of last modification */ 
-        //       time_t    st_ctime;   /* time of last status change */ 
-        //   };	
+	char err_elf [] = "Fichier au format non ELF";
+	char err_arch [] = "Fichier à l'architecture non 32bits";
+	
 	struct stat file_info;
 	int file_descriptor;
 
-
-	if (argc != 2)
-	{
+	if (argc != 2){//Verification nb arguments
 		puts(err_args);
 	}
-	else
-	{
-		//int open(const char *path, int oflags);
-		//Returns the file descriptor for the new file. 
-		//The file descriptor returned is the smallest integer > 0 that is still available. 
-		//If a negative value is returned, then there was an error opening the file.
-		if ((file_descriptor = open(argv[1], O_RDONLY)) <= 0)
-		{
+	else{
+		if ((file_descriptor = open(argv[1], O_RDONLY)) <= 0){	//Verification d'ouverture du fichier
 			puts(err_open);
 		}
-		else
-		{
-			//int fstat(int fd, struct stat *buf);
-			//printf("%d\n",fstat(file_descriptor, &file_info)); //-> 0
-			if (fstat(file_descriptor, &file_info) == -1)
-			{
+		else{
+			if (fstat(file_descriptor, &file_info) == -1){	//Verification de récupartion des infos du fichier
 				puts(err_rec);
 			}
-			//void *mmap(void *addr, size_t len, int protection, int flags, int fildes, off_t off);
-			else if ((data = mmap(0, file_info.st_size, PROT_READ, MAP_PRIVATE, file_descriptor, 0)) == MAP_FAILED)
-			{
+			else if ((data = mmap(0, file_info.st_size, PROT_READ, MAP_PRIVATE, file_descriptor, 0)) == MAP_FAILED){	//Verification du chargement en memoire du fichier
 				puts(err_mem);
 			}
-			else
-			{
-				//puts("POINT 1");							
-				if (check_elf(data))
+			else{				
+				if (check_elf(data))	//Verification fichier ELF
 				{
-					puts("POINT 2");puts(err_elf);puts("POINT 3");
+					puts(err_elf);
 				}
-				else if (check_arch(data))
+				else if (check_arch(data))	//Verification fichier 32bits
 				{
-					puts("POINT 4");puts(err_arch);puts("POINT 5");
+					puts(err_arch);
 				}
 				else
 				{
-					//puts("POINT 6");
-					print_info(data);//puts("POINT 7");
+					print_info(data);	//traitement et affichage du header
 				}
-				munmap(data, file_info.st_size);
+				munmap(data, file_info.st_size);	//Unmapping du fichier en mémoire
 			}
-			close(file_descriptor);
+			close(file_descriptor);	//Fermeture du fichier
 		}
 	}
 	return (0);
 }
-	///////////////////////////////////////////////////////
 
