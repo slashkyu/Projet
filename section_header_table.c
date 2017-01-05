@@ -25,20 +25,6 @@ int check_arch(Elf32_Ehdr * data)
   return (0);
 }
 
-/*
-typedef struct {
-    uint32_t   sh_name;
-    uint32_t   sh_type;
-    uint32_t   sh_flags;
-    Elf32_Addr sh_addr;
-    Elf32_Off  sh_offset;
-    uint32_t   sh_size;
-    uint32_t   sh_link;
-    uint32_t   sh_info;
-    uint32_t   sh_addralign;
-    uint32_t   sh_entsize;
-} Elf32_Shdr;*/
-
 void print_section_table(Elf32_Ehdr * data)
 {
   int i;
@@ -64,7 +50,7 @@ void print_section_table(Elf32_Ehdr * data)
 		printf("[%d]\n",i);
 
     // on affiche les infos de la section
-    printf("Nom : %s\nType :", strings + section_header.sh_name);	//nom
+    printf("Nom : %s\nType : ", strings + section_header.sh_name);	//nom
     
     if(section_header.sh_type == 0){	//type
     	printf("NULL");
@@ -140,9 +126,31 @@ void print_section_table(Elf32_Ehdr * data)
     if (section_header.sh_flags & (1u << 10)){	//TLS
     	printf("T ");
     }
-    printf("\nAdresse : 0x%08x", section_header.sh_addr);
-    printf("\nDécalage : 0x%06x\n", section_header.sh_offset);
+    printf("\nAdresse : 0x%08x", section_header.sh_addr);	//adresse
     
+    printf("\nDécalage : 0x%06x", section_header.sh_offset);	//offset
+    
+    printf("\nTaille : 0x%06x", section_header.sh_size); //taille
+    
+    printf("\nLien : %d", section_header.sh_link);	//Lien
+    
+    printf("\nInfo : %d", section_header.sh_info);	//Info
+    
+    printf("\nAlignement d'adresse : ");
+    if (section_header.sh_addralign != 0 && section_header.sh_addralign != 1){
+    	printf("%d", section_header.sh_addralign); //Alignement adresse
+    }
+    else{
+    	printf("non");
+    }
+    
+    printf("\nEntrée de taille fixe : ");
+    if (section_header.sh_entsize != 0){
+    	 printf("%d (octets)\n\n", section_header.sh_entsize);
+    }
+    else{
+    	printf("non\n\n");
+    }
   }
 }
 
@@ -159,7 +167,7 @@ int main(int argc, char *argv[])
 	struct stat file_info;
 	int file_descriptor;
 
-	if (argc != 2){//Verification nb arguments
+	if (argc != 2){	//Verification nb arguments
 		puts(err_args);
 	}
 	else{
