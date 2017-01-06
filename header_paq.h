@@ -8,6 +8,22 @@
 #include <sys/mman.h>
 #include <elf.h>
 
+
+/* STRUCTURE DE STOCKAGE D'INFORMATIONS
+typedef struct {
+
+		Elf32_Ehdr *header;
+
+		Elf32_Shdr **table_section;
+
+		El32_Sym **table_Symbole;
+}Elf_stck;
+
+//Elf_stck Elf //variable globale
+
+*/
+
+
 // Vérification des 4 premiers octets du nombre magique ("7f 45 4c 46")
 int check_elf(Elf32_Ehdr * data);
 

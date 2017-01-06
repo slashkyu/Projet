@@ -169,6 +169,11 @@ void print_section_table(Elf32_Ehdr * data)
   // on recupere un pointeur sur le premier header de section, avec le offset correspondant
   Elf32_Shdr *section_header_start = (Elf32_Shdr*)((void*)data + data->e_shoff);
 
+
+  //STRUCTURE DE STOCKAGE
+  //Elf.table_section = section_header_start;
+
+
   // on retrouve la string table avec le nom des sections ..
   Elf32_Shdr sections_string = section_header_start[data->e_shstrndx];
   
@@ -181,6 +186,8 @@ void print_section_table(Elf32_Ehdr * data)
   for (i = 0; i < data->e_shnum; i++){
   	// on recupere le header de section courrant
     section_header = section_header_start[i];
+	
+
 
 		printf("[%d]\n",i);
 
@@ -367,6 +374,9 @@ void print_section(Elf32_Ehdr * data)
 void process_etapes(int file_descriptor, char sous_option)
 {
 
+//STRUCTURE DE STOCKAGE
+//Elf = malloc(sizeof(Elf_stck);
+
 	Elf32_Ehdr *data;
 	char err_rec [] = "Recuperation des informations du fichier impossible";
 	char err_mem [] = "Chargement du fichier en memoire impossible";
@@ -403,7 +413,12 @@ void process_etapes(int file_descriptor, char sous_option)
 		//Affichage des etapes
 		else
 		{
-					
+			
+		//STRUCTURE DE STOCKAGE
+		//Elf.header = data
+
+
+
 			switch (sous_option)
 				{
 					case 'a' : //all
@@ -459,4 +474,3 @@ void process_etapes(int file_descriptor, char sous_option)
 	close(file_descriptor);
 
 }
-
