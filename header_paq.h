@@ -16,7 +16,9 @@ int check_arch(Elf32_Ehdr * data);
 
 // Procédure d'affichage des infos du header ELF
 void print_info(Elf32_Ehdr * data);
-
-void process_header(int file_descriptor);
+void print_section_table(Elf32_Ehdr * data);
+void print_section(Elf32_Ehdr * data);
+//ETAPES 1_2_3
+void process_etapes(int file_descriptor, char sous_option);
 
 #endif

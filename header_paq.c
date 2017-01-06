@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -94,7 +95,7 @@ void print_info(Elf32_Ehdr * data)
    		case 255  :
       			puts("Standalone"); break;
    		default  :
-      			printf("Autre avec le code %x\n", data->e_ident[6]); break;
+      			printf("Autre avec le code %x\n", data->e_ident[7]); break;
 	}
 	printf("  Version ABI:                       %d\n", data->e_ident[8]);
 	printf("  Type:                              ");
@@ -158,28 +159,220 @@ void print_info(Elf32_Ehdr * data)
 }
 
 
-void process_header(int file_descriptor)
+
+void print_section_table(Elf32_Ehdr * data)
 {
-  	Elf32_Ehdr *data;
+  int i;
+
+  printf("Il y a %d en-têtes de section, débutant à l'adresse de décalage 0x%02x:\n",data->e_shnum, data->e_shoff);
+
+  // on recupere un pointeur sur le premier header de section, avec le offset correspondant
+  Elf32_Shdr *section_header_start = (Elf32_Shdr*)((void*)data + data->e_shoff);
+
+  // on retrouve la string table avec le nom des sections ..
+  Elf32_Shdr sections_string = section_header_start[data->e_shstrndx];
+  
+  // on recupere un pointeur sur le debut de la section et donc sur la premiere chaine
+  char *strings = (char*)((void*)data + sections_string.sh_offset);
+
+  // pour stoquer chaque section
+  Elf32_Shdr section_header;
+
+  for (i = 0; i < data->e_shnum; i++){
+  	// on recupere le header de section courrant
+    section_header = section_header_start[i];
+
+		printf("[%d]\n",i);
+
+    // on affiche les infos de la section
+    printf("Nom : %s\nType : ", strings + section_header.sh_name);	//nom
+    
+    if(section_header.sh_type == 0){	//type
+    	printf("NULL");
+    }
+    else if(section_header.sh_type == 1){
+  	printf("PROGBITS");
+    }
+    else if(section_header.sh_type == 2){
+    	printf("SYMTAB");
+    }
+    else if(section_header.sh_type == 3){
+     	printf("STRTAB");
+    }
+    else if(section_header.sh_type == 4){
+     	printf("RELA");
+    }
+    else if(section_header.sh_type == 5){
+     	printf("HASH");
+    }
+    else if(section_header.sh_type == 6){
+     	printf("DYNAMIC");
+    }
+    else if(section_header.sh_type == 7){
+     	printf("NOTE");
+    }
+    else if(section_header.sh_type == 8){
+     	printf("NOBITS");
+    }
+    else if(section_header.sh_type == 9){
+     	printf("REL");
+    }
+    else if(section_header.sh_type == 10){
+     	printf("SHLIB");
+    }
+    else if(section_header.sh_type == 11){
+    	printf("DYNSYM");
+    }
+    else if(section_header.sh_type >= 0x70000000 && section_header.sh_type <= 0x7fffffff){
+     	printf("PROCSPECSEM");
+    }  //Correspond à "processor specific semantic"  
+    else if(section_header.sh_type >= 0x80000000 && section_header.sh_type <= 0xffffffff){
+     	printf("APPINDEX");
+    }
+    
+    printf("\nFanions : ");	//flags
+    if (section_header.sh_flags & (1u << 0)){	//écriture
+    	printf("W ");
+    }
+    if (section_header.sh_flags & (1u << 1)){	//allocation
+    	printf("A ");
+    }
+    if (section_header.sh_flags & (1u << 2)){	//exécution
+    	printf("X ");
+    }
+    if (section_header.sh_flags & (1u << 4)){	//fusion
+    	printf("M ");
+    }
+    if (section_header.sh_flags & (1u << 5)){	//chaînes
+    	printf("S ");
+    }
+    if (section_header.sh_flags & (1u << 6)){	//info
+    	printf("I ");
+    }
+    if (section_header.sh_flags & (1u << 7)){	//ordre des liens
+    	printf("L ");
+    }
+    if (section_header.sh_flags & (1u << 8)){	//os nonconforming
+    	printf("0 ");
+    }
+    if (section_header.sh_flags & (1u << 9)){	//groupe
+    	printf("G ");
+    }
+    if (section_header.sh_flags & (1u << 10)){	//TLS
+    	printf("T ");
+    }
+    printf("\nAdresse : 0x%08x", section_header.sh_addr);	//adresse
+    
+    printf("\nDécalage : 0x%06x", section_header.sh_offset);	//offset
+    
+    printf("\nTaille : 0x%06x", section_header.sh_size); //taille
+    
+    printf("\nLien : %d", section_header.sh_link);	//Lien
+    
+    printf("\nInfo : %d", section_header.sh_info);	//Info
+    
+    printf("\nAlignement d'adresse : ");
+    if (section_header.sh_addralign != 0 && section_header.sh_addralign != 1){
+    	printf("%d", section_header.sh_addralign); //Alignement adresse
+    }
+    else{
+    	printf("non");
+    }
+    
+    printf("\nEntrée de taille fixe : ");
+    if (section_header.sh_entsize != 0){
+    	 printf("%d (octets)\n\n", section_header.sh_entsize);
+    }
+    else{
+    	printf("non\n\n");
+    }
+  }
+}
+
+void print_section(Elf32_Ehdr * data)
+{
+  int i, section_int = -1;
+  unsigned char hex; //%hu
+
+  ////////////////////////
+	char section_string[20];
+	puts("Entrez section name : ");	
+	scanf("%s",section_string);
+	//section_string = ".symtab";
+	
+
+
+  ////////////////////////
+
+  // on recupere un pointeur sur le premier header de section, avec le offset correspondant
+  Elf32_Shdr *section_header_start = (Elf32_Shdr*)((void*)data + data->e_shoff);
+
+  // on retrouve la string table avec le nom des sections ..
+  Elf32_Shdr sections_string = section_header_start[data->e_shstrndx];
+  
+  // on recupere un pointeur sur le debut de la section et donc sur la premiere chaine
+  char *strings = (char*)((void*)data + sections_string.sh_offset);
+
+  // pour stoquer chaque section
+  Elf32_Shdr section_header;
+  
+  //lecture de la section choisie
+  
+  if(section_string[0] == '0'){
+  	section_int=0;
+  	section_header = section_header_start[section_int];
+  }  
+  else if(atoi(section_string) < data->e_shnum && atoi(section_string) > 0){	//si la section est choisie par son numéro
+  	section_int = atoi(section_string);
+  	section_header = section_header_start[section_int];
+  }
+  else{	//si la section est choisie par son nom
+  	i=1;
+  	section_header = section_header_start[i];
+  	while (strstr(strings + section_header.sh_name, section_string) == NULL && i < data->e_shnum){
+  		i++;
+  		section_header = section_header_start[i];
+	  }  	
+	  if (i < data ->e_shnum){
+	  	section_int = i;
+	  }
+  }
+  
+  if (section_int == -1){	//erreur d'argument
+  	printf("Il n'y a pas de section %s dans ce fichier.\n", section_string);
+  }
+	else{
+		if (section_header.sh_size == 0){	//La section a une taille vide
+			printf("La section \" %s \" n'a pas de données à être videngé.\n",strings + section_header.sh_name);
+		}
+		else{	//hexdump de la section
+			printf("Vidange hexadécimale de la section \" %s \":\n",strings + section_header.sh_name);
+			i=0;
+			while(i < section_header.sh_size){
+				if (i % 4 == 0){	//Formatage
+					printf(" ");
+				}
+				printf("%x", section_header.sh_offset+i);	//On souhaite afficher le contenu, or on a ici les adresses
+				i++;
+				if (i % 16 == 0){	//Formatage
+					printf("\n");
+				}
+			}			
+		}
+	}	
+}
+
+
+//ETAPES 1_2_3
+void process_etapes(int file_descriptor, char sous_option)
+{
+
+	Elf32_Ehdr *data;
 	char err_rec [] = "Recuperation des informations du fichier impossible";
 	char err_mem [] = "Chargement du fichier en memoire impossible";
 	char err_elf [] = "Pas format propre";
 	char err_arch [] = "Mauvais architecture";
-	//struct stat { 
-        //       dev_t     st_dev;     /* ID of device containing file */ 
-        //       ino_t     st_ino;     /* inode number */ 
-        //       mode_t    st_mode;    /* protection */ 
-        //       nlink_t   st_nlink;   /* number of hard links */ 
-        //       uid_t     st_uid;     /* user ID of owner */ 
-        //       gid_t     st_gid;     /* group ID of owner */ 
-        //       dev_t     st_rdev;    /* device ID (if special file) */ 
-        //       off_t     st_size;    /* total size, in bytes */ 
-        //       blksize_t st_blksize; /* blocksize for file system I/O */ 
-        //       blkcnt_t  st_blocks;  /* number of 512B blocks allocated */ 
-        //       time_t    st_atime;   /* time of last access */ 
-        //       time_t    st_mtime;   /* time of last modification */ 
-        //       time_t    st_ctime;   /* time of last status change */ 
-        //   };	
+
 	struct stat file_info;
 
 	//Verification de récupartion des infos du fichier
@@ -207,10 +400,57 @@ void process_header(int file_descriptor)
 		{
 			puts(err_arch);
 		}
-		//Affichage du header
+		//Affichage des etapes
 		else
 		{
-			print_info(data);
+					
+			switch (sous_option)
+				{
+					case 'a' : //all
+					case 'b' : //header
+						print_info(data);
+						if (sous_option!='a')
+							break;
+					case 'c' : //section table
+						print_section_table(data);
+						if (sous_option!='a')
+						break;
+					case 'd' : //section
+						print_section(data);
+						if (sous_option!='a')
+							break;
+				}			
+			#if 0	//SOUS-option est lu depuis stdin!
+			char sous_option;
+			char mess_sopt [] = "Choisissez un sous-otption : \na - all\nb - header\nc - section table\nd - section";
+			char err_sopt [] = "Sous-option mal choisi!";
+			while (1)
+			{
+				puts(mess_sopt);
+				scanf(" %c", &sous_option);
+				switch (sous_option)
+				{
+					case 'a' : //all
+					case 'b' : //header
+						print_info(data);
+						if (sous_option!='a')
+							break;
+					case 'c' : //section table
+						print_section_table(data);
+						if (sous_option!='a')
+						break;
+					case 'd' : //section
+						print_section(data);
+						if (sous_option!='a')
+							break;
+					default : //erreur
+						puts(err_sopt);
+						if (sous_option!='a')
+							continue;
+				}
+				break;
+			}
+			#endif
 		}
 		//Unmapping du fichier en mémoire
 		munmap(data, file_info.st_size);
