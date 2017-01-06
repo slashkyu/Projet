@@ -30,7 +30,6 @@ int check_arch(Elf32_Ehdr * data)
 void print_section(Elf32_Ehdr * data, char *section_string)
 {
   int i, section_int = -1;
-  unsigned char hex; //%hu
 
   // on recupere un pointeur sur le premier header de section, avec le offset correspondant
   Elf32_Shdr *section_header_start = (Elf32_Shdr*)((void*)data + data->e_shoff);
@@ -74,18 +73,20 @@ void print_section(Elf32_Ehdr * data, char *section_string)
 			printf("La section \" %s \" n'a pas de données à être videngé.\n",strings + section_header.sh_name);
 		}
 		else{	//hexdump de la section
-			printf("Vidange hexadécimale de la section \" %s \":\n",strings + section_header.sh_name);
+			unsigned char *content = (unsigned char*)((void*)data + section_header.sh_offset);
 			i=0;
-			while(i < section_header.sh_size){
+			printf("Vidange hexadécimale de la section \" %s \":\n  Ox%08x",strings + section_header.sh_name,i);
+			while(i < section_header.sh_size){	//boucle de récupération du contenu
 				if (i % 4 == 0){	//Formatage
 					printf(" ");
 				}
-				printf("%x", section_header.sh_offset+i);	//On souhaite afficher le contenu, or on a ici les adresses
+				printf("%02x", *(content+i));
 				i++;
-				if (i % 16 == 0){	//Formatage
-					printf("\n");
+				if (i % 16 == 0 && i < section_header.sh_size){	//Formatage
+					printf("\n  Ox%08x",i);
 				}
-			}			
+			}
+			printf("\n");			
 		}
 	}	
 }
