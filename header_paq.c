@@ -170,10 +170,6 @@ void print_section_table(Elf32_Ehdr * data)
   Elf32_Shdr *section_header_start = (Elf32_Shdr*)((void*)data + data->e_shoff);
 
 
-  //STRUCTURE DE STOCKAGE
-  //Elf.table_section = section_header_start;
-
-
   // on retrouve la string table avec le nom des sections ..
   Elf32_Shdr sections_string = section_header_start[data->e_shstrndx];
   
@@ -374,8 +370,6 @@ void print_section(Elf32_Ehdr * data)
 void process_etapes(int file_descriptor, char sous_option)
 {
 
-//STRUCTURE DE STOCKAGE
-//Elf = malloc(sizeof(Elf_stck);
 
 	Elf32_Ehdr *data;
 	char err_rec [] = "Recuperation des informations du fichier impossible";
