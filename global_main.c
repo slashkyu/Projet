@@ -1,39 +1,44 @@
 #include <stdio.h>
-#include "header_paq.h"
+#include "lecture_paq.h"
+//#include "messages_paq.h"
 //Autres fichers .h
+
 
 int main(int argc, char *argv[])
 {
-	char option = 'a';
-	char menu [] = "Option e : Exit \nOption a : Etapes 1_2_3\nOption b : Header\nOption c : Section Table\nOption d : Section";
-	char err_option [] = "Le caractere entre n'est pas valide";
-	char err_open [] = "Ouverture du fichier impossible";
-	char err_args [] = "USAGE: executable <binary_file>";
-	char suc_goodbye [] =  "Au revoir";
+	char option = 'a'; 
+
+	language = 0;
 	while (1)
 	{
-		puts(" ");		
-		puts(menu);		
+		puts("-----------------------------------------------------");
+		puts("-----------------------------------------------------");
+		puts("-----------------------------------------------------");
+		puts((language)?"Option e : Exit \nOption l : Changer langue a FRA \nOption a : Steps 1_2_3_4\nOption b : Header\nOption c : Section Table\nOption d : Section\nOption f : Symbol":"Option e : Sortie \nOption l : Change language to ENG \nOption a : Etapes 1_2_3_4\nOption b : Header\nOption c : Section Table\nOption d : Section\nOption f : Symbole");
 		scanf(" %c",&option);
 		switch (option)
 		{
+			case 'l' : //Language
+				language = 1 - language;
+				continue;
 			case 'e' : //EXIT
-				puts(suc_goodbye);
+				puts((language)?"Bye":"Au revoir");
 				break;
-			case 'a' : //ETAPES 1_2_3	
+			case 'a' : //ETAPES 1_2_3_4
 			case 'b' : //ETAPE 1: HEADER
 			case 'c' : //ETAPE 2: SECTION TABLE
 			case 'd' : //ETAPE 3: SECTION
+			case 'f' : //ETAPE 4: SYMBOLE
 				if (argc < 2)
 				{
-					puts(err_args);
+					fputs((language)?"USAGE: executable <binary_file>":"USAGE: executable <fichier_binaire>",stderr);
 					continue;
 				}
 				else
 				{
 					if (open(argv[1], O_RDONLY) <= 0)
 					{
-						puts(err_open);
+						fputs((language)?"Opening of the file has failed":"Ouverture du fichier impossible",stderr);
 						continue;
 					}
 					else
@@ -43,10 +48,10 @@ int main(int argc, char *argv[])
 					}
 				}
 			//ETAPE X:
-			case 'f' : 
+			case 'z' : 
 				break;
 			default :
-				puts(err_option);
+				fputs((language)?"The character in NOT valid":"Le caractere entre n'est pas valide",stderr);
 				continue;
 		}
 		break;
