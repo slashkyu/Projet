@@ -13,7 +13,7 @@
 
 
 // STRUCTURE DE STOCKAGE D'INFORMATIONS
-typedef struct {
+typedef struct Elf_Structure{
 
 		Elf32_Ehdr *header;
 		
