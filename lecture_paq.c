@@ -485,7 +485,7 @@ static const char *get_section_type_name (unsigned int sh_type)
 }
 
 
-void print_section_table(Elf32_Ehdr * elf_header)// a faire!!!!!
+void print_section_table(Elf32_Ehdr * elf_header)
 {
 	// on recupere un pointeur sur le premier header de section, avec le offset correspondant
 	Elf32_Shdr *section_header_start = (Elf32_Shdr*)((void*)elf_header + elf_header->e_shoff);
@@ -886,6 +886,72 @@ void print_sym(Elf32_Ehdr * data)
 	}
 }
 ///////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////ETAPE 5///////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////
+
+
+void afficherReloc(Elf32_Ehdr *data){
+	int i;
+	int nb= 0;
+	int tailleSymRela = 0;
+	int tailleSymRel = 0;
+	int nbSymRela = 0;
+	int nbSymRel = 0;
+	Elf32_Shdr *section_header_start = (Elf32_Shdr*)((void*)data + data->e_shoff);
+	Elf32_Shdr *sections_string = section_header_start + data->e_shstrndx;
+	Elf32_Shdr *section_header;
+	Elf32_Shdr *section_rela;
+	Elf32_Shdr *section_rel;
+	Elf32_Shdr *section_strtab;
+	Elf32_Shdr *section_sym;
+	char *stringsSec = (char*)((void*)data + sections_string->sh_offset);
+//trouve le offset de la section SHT_RELA et la section SHT_REL
+	section_rela = sectionRela(data);
+	section_rel = sectionRel(data);
+	section_sym = sectionSymtab(data);
+	char *strSym = stringSym(data);
+	
+	char type[25];
+	if(sectionRelE(data)){	
+		Elf32_Rel *rel_Start = (Elf32_Rel*)((void*)data + section_rel->sh_offset);
+		Elf32_Sym *sym_Start = (Elf32_Sym*)((void*)data + section_sym->sh_offset);
+		Elf32_Rel *rel_header;
+		int nb_rel = section_rel->sh_size/section_rel->sh_entsize;
+		tailleSymRel = section_rel->sh_entsize;
+		nbSymRel = section_rel->sh_size/tailleSymRel;
+
+
+		printf("Section de relocalisation '.rel.text' à l'adresse de décalage 0x%02x contient %d entrées\n",nb_rel,section_rel->sh_offset);
+		printf("Décalage   Info    Type             Sym.Value   \n");
+		for(i=0;i<nbSymRel;i++){
+			rel_header = rel_Start+i;
+//Décalage	
+			printf("%08x  ",(rel_header->r_offset));
+//Info	
+			printf("%08x ",(ELF32_R_INFO(ELF32_R_SYM(rel_header->r_info),ELF32_R_TYPE(rel_header->r_info))));
+//Type	
+			switch (ELF32_R_TYPE(rel_header->r_info)) {
+				case 0x1c : 
+					strcpy(type, "R_ARM_CALL");
+					break;
+				case 0x2 : 
+					strcpy(type, "R_ARM_ABS32");
+					break;		
+			} 
+			printf("%-17s ",type);
+//Sym	
+			printf("%08x \n",(ELF32_R_SYM(rel_header->r_info)));
+//nom Sym
+		}	
+	}
+}
+
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////ETAPES 1 2 3 4/////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -915,7 +981,7 @@ int check_format(Elf32_Ehdr * data)
 		return (0);
 	}
 	if(data->e_ident[EI_VERSION] != EV_CURRENT) {
-		fputs((language)?"Unsupported ELF File version (1 expected)":"Version de fichier ELF invalide (1 attendu)",stderr);
+		fputs((language)?"Unsupported ELF File version (1 expected)":"Version de fichier ELF invalide (1 attendu)\n",stderr);
 		return (0);
 	}
 	if(data->e_type != ET_REL && data->e_type != ET_EXEC) {
@@ -925,7 +991,9 @@ int check_format(Elf32_Ehdr * data)
 	return (1);
 }
 
-//ETAPES 1_2_3_4 MAIN
+
+
+//ETAPES 1_2_3_4_5 MAIN
 void process_etapes(int file_descriptor, char sous_option)
 {
 
@@ -964,6 +1032,10 @@ void process_etapes(int file_descriptor, char sous_option)
 					break;
 			case 'f' : //symbol
 				print_sym(data);
+				if (sous_option!='a')
+					break;
+			case 'g' : //symbol
+				afficherReloc(data);
 				if (sous_option!='a')
 					break;
 		}
