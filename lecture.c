@@ -82,11 +82,15 @@ char *string_section(Elf32_Ehdr * h){
 }
 
 Elf32_Shdr *get_string_symbole(Elf32_Ehdr * h){
+	printf("%02x",(get_sectionN(h,".strtab"))->sh_offset);
 	Elf32_Shdr *s = (Elf32_Shdr*)((void*)h + get_sectionN(h,".strtab")->sh_offset);
+	//Elf32_Shdr *s = get_sectionN(h,".strtab")->sh_offset);
+	//printf("%02x",s->sh_offset);
 	return s;
 }
 
 char *string_symbole(Elf32_Ehdr * h){
+	printf("char: %02x",get_string_symbole(h)->sh_offset);
 	char *strings = (char*)((void*)h + get_string_symbole(h)->sh_offset);
 	return strings;
 }
@@ -238,8 +242,25 @@ Elf32 *initELF(Elf32_Ehdr * data){
 	e->nb_Section = nbSec;
 	//init nb symbole
 	e->nb_Symbole = nbSym;
+	//init string section
+	char* cSec = string_section(data);
+	e->string_table_section = cSec;
+/*
+	for(int i; i<10; i++){
+		printf("%s\n",cSec+((get_section_table(data)+i)->sh_name));
+	}
+*/
+	//printf("%d\n",exite);
 
-	
+	//init string symbole
+	char* cSym = string_symbole(data);
+	e->string_table_symbole = cSym;
+/*
+	for(i; i<10; i++){
+		printf("%s\n",cSym+((get_symbole_table(data)+i)->st_name));
+	}
+*/
+	//printf("%d\n",exite);
 	return e;
 }
 
