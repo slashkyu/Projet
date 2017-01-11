@@ -566,7 +566,7 @@ void afficherSectionTable(Elf32 *e){
 		printf("%08x ",(e->table_symbole + i)->st_value);
 
 		//affichage de la taille
-		printf("%6d ",(e->table_symbole + i)->st_size);
+		printf("%5d ",(e->table_symbole + i)->st_size);
 
 		//Type
 		type = ELF32_ST_TYPE((e->table_symbole + i)->st_info);
@@ -594,7 +594,7 @@ void afficherSectionTable(Elf32 *e){
 
 
 		if((e->table_symbole + i)->st_other == 0){
-			printf(" DEFAULT");
+			printf("DEFAULT ");
 		}
 
 		if((e->table_symbole + i)->st_shndx == 0){
@@ -604,10 +604,9 @@ void afficherSectionTable(Elf32 *e){
 			printf(" ABS ");
 		}
 		else{
-			printf("%3x ",(e->table_symbole + i)->st_shndx);
+			printf(" %3x ",(e->table_symbole + i)->st_shndx);
 		}
-		printf("\n");
-		printf("%09x ",(e->string_table_symbole)[(e->table_symbole + i)->st_name]);
+		printf("%s \n",(e->string_table_symbole)+(e->table_symbole + i)->st_name);
 
 	}
 } 
