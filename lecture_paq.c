@@ -273,8 +273,6 @@ void print_header(Elf32_Ehdr * data)
 	{
 		printf("  %s                          %s\n",(language)?"Data:    ":"Données:",(language)?"2's complement, little endian":"complément à 2, système à octets de poids faible d'abord (little endian)");
 	}
-	//////////////                              /////////
-	//////////////                          /////////
 	else if (data->e_ident[5] == 2)
 	{
 		printf("  %s                          %s\n",(language)?"Data:    ":"Données:",(language)?"big endian":"système à octets de poids fort d'abord (big endian)");
@@ -342,7 +340,7 @@ void print_header(Elf32_Ehdr * data)
 	//Type
 	printf("  Type:                              ");
 	switch(data->e_type) 
-	{
+	{type
    		case ET_REL  :
       			puts((language)?"REL (Relocatable file)":"REL (Fichier de relocalisation)"); break;
    		case ET_EXEC  :
@@ -416,7 +414,7 @@ void print_header(Elf32_Ehdr * data)
 	//Start of program headers
 	printf("  %s%d %s\n", (language)?"Start of program headers:          ":"Début des en-têtes de programme:   ", data->e_phoff, (language)?"(bytes into file)":"(octets dans le fichier)");
 	//Start of section headers
-	printf("  %s%d %s\n", (language)?"Start of section headers:          ":"Début des en-têtes de section:         ", data->e_shoff, (language)?"(bytes into file)":"(octets dans le fichier)");
+	printf("  %s%d %s\n", (language)?"Start of section headers:          ":"Début des en-têtes de section:          ", data->e_shoff, (language)?"(bytes into file)":"(octets dans le fichier)");
 	//Flags
   	printf("  %s0x%0x", (language)?"Flags:                             ":"Fanions:                           ", data->e_flags);
 	if (data->e_entry)
@@ -501,7 +499,7 @@ void print_section_table(Elf32_Ehdr * elf_header)
 		puts ((language)?"Section Headers:":"Table des en-têtes de sections :");
 	else
 		puts ((language)?"Section Header:":"Table des en-têtes de sections :");
-	puts("  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al");
+	puts((language)?"  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al":"  [Nr] Nom               Type            Adr      Décala.Taille ES Fan LN Inf Al");
 	//Affichage du tableau
 	for (i = 0; i < elf_header->e_shnum; i++)
 	{
@@ -564,9 +562,9 @@ void print_section_table(Elf32_Ehdr * elf_header)
 
 		puts(" ");
 	}
-    puts("Key to Flags:\nW (write), A (alloc), X (execute), M (merge), S (strings)");
-	puts("I (info), L (link order), G (group), T (TLS), E (exclude), x (unknown)");
-	puts("O (extra OS processing required) o (OS specific), p (processor specific)");
+    	puts((language)?"Key to Flags:\nW (write), A (alloc), X (execute), M (merge), S (strings)":"Clé des fanions:\nW (écriture), A (allocation), X (exécution), M (fusion), S (chaînes)");
+	puts((language)?"I (info), L (link order), G (group), T (TLS), E (exclude), x (unknown)":"I (info), L (ordre des liens), G (groupe), T (TLS), E (exclu), x (inconnu)");
+	puts((language)?"O (extra OS processing required) o (OS specific), p (processor specific)":"O (traiterment additionnel requis pour l'OS) o (spécifique à l'OS), p (spécifique au processeur)");
 }
 ///////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////ETAPE 3///////////////////////////////////////////
@@ -574,50 +572,10 @@ void print_section_table(Elf32_Ehdr * elf_header)
 void print_section(Elf32_Ehdr * data)
 {
 	int i, section_int = -1;
-	char option;
-	char section_string [17];
+	char section_string[20];
 	//Lecture de nom de section
-	while (1)
-	{
-		puts((language)?"Section names :":"Noms de sections :");
-		puts("1 .text | 2 .rel.text | 3 .data | 4 .bss | 5 .comment | \n6 .ARM.attributes | 7 .shstrtab | 8 .symtab | 9 .strtab");
-		puts((language)?"Enter section number :":"Entrez numero de section :");
-		scanf(" %c",&option);
-		switch (option)
-		{
-			case '1' :
-				strcpy(section_string,".text");
-				break;
-			case '2' :
-				strcpy(section_string,".rel.text");
-				break;
-			case '3' :
-				strcpy(section_string,".data");
-				break;
-			case '4' :
-				strcpy(section_string,".bss");
-				break;
-			case '5' :
-				strcpy(section_string,".comment");
-				break;
-			case '6' :
-				strcpy(section_string,".ARM.attributes");
-				break;
-			case '7' :
-				strcpy(section_string,".shstrtab");
-				break;
-			case '8' : 
-				strcpy(section_string,".symtab");
-				break;
-			case '9' : 
-				strcpy(section_string,".strtab");
-				break;
-			default :
-				fputs(((language)?"The character in NOT valid":"Le caractere entre n'est pas valide"),stderr);
-				continue;
-		}
-		break;
-	}
+	puts((language)?"Enter section number or section name :":"Entrez numero de section ou nom de section :");
+	scanf("%s",section_string);
 
 	// on recupere un pointeur sur le premier header de section, avec le offset correspondant
 	Elf32_Shdr *section_header_start = (Elf32_Shdr*)((void*)data + data->e_shoff);
@@ -646,7 +604,7 @@ void print_section(Elf32_Ehdr * data)
 	{	//si la section est choisie par son nom
 		i=1;
 		section_header = section_header_start[i];
-		while (strstr(strings + section_header.sh_name, section_string) == NULL && i < data->e_shnum)
+		while (strcmp(strings + section_header.sh_name, section_string) != 0 && i < data->e_shnum)
 		{
 			i++;
 			section_header = section_header_start[i];
@@ -663,7 +621,7 @@ void print_section(Elf32_Ehdr * data)
 	{
 		if (section_header.sh_size == 0) //La section a une taille vide
 		{
-			fprintf(stderr, "Section \" %s \" %s", strings + section_header.sh_name,((language)?"has nothing":"n'a pas de données à être videngé"));
+			fprintf(stderr, "Section \" %s \" %s\n", strings + section_header.sh_name,((language)?"has nothing":"n'a pas de données à être videngé"));
 		}
 		else //hexdump de la section
 		{
@@ -689,12 +647,15 @@ void print_section(Elf32_Ehdr * data)
 /////////////////////////////////////////ETAPE 4///////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
 //trouve  la section .symtab (table des symboles, taille de la section, taille de chaque symboles)
-Elf32_Shdr *sectionSymtab(Elf32_Ehdr* data){
+
+
+
+Elf32_Shdr *get_section_header(Elf32_Ehdr* data, int indice){
 	Elf32_Shdr *section_header_start = (Elf32_Shdr*)((void*)data + data->e_shoff);
 	Elf32_Shdr *section_header; int i;
 	for (i = 0; i < data->e_shnum; i++){
 		section_header = section_header_start+i;
-		if(section_header->sh_type == 2){
+		if(section_header->sh_type == indice){
 			//printf("%x\n",section_header->sh_offset);
 			return section_header;
 		}
@@ -704,12 +665,8 @@ Elf32_Shdr *sectionSymtab(Elf32_Ehdr* data){
 
 //trouve la section .shstrtab (les nom des sections)
 Elf32_Shdr *sectionShstrtab(Elf32_Ehdr* data){
-	int i;
-	int nb= 0;
-	int tailleSym = 0;
 	Elf32_Shdr *section_header_start = (Elf32_Shdr*)((void*)data + data->e_shoff);
 	Elf32_Shdr *section_header = section_header_start + data->e_shstrndx;
-	//printf("%x\n",section_header->sh_offset);
 	return section_header;
 }
 
@@ -728,18 +685,7 @@ Elf32_Shdr *sectionStrtab(Elf32_Ehdr* data){
 	return section_header;
 }
 
-//trouve la section .rel
-Elf32_Shdr *sectionRel(Elf32_Ehdr* data){
-	Elf32_Shdr *section_header_start = (Elf32_Shdr*)((void*)data + data->e_shoff);
-	Elf32_Shdr *section_header; int i;
-	for (i = 0; i < data->e_shnum; i++){
-		section_header = section_header_start+i;
-		if(section_header->sh_type == 9){
-			return section_header;
-		}
-	}
-	return section_header;
-}
+
 
 //section.rel exsite
 int sectionRelE(Elf32_Ehdr* data){
@@ -755,19 +701,7 @@ int sectionRelE(Elf32_Ehdr* data){
 	return e;
 }
 
-//trouve la section .rela
-Elf32_Shdr *sectionRela(Elf32_Ehdr* data){
-	Elf32_Shdr *section_header_start = (Elf32_Shdr*)((void*)data + data->e_shoff);
-	Elf32_Shdr *section_header; int i;
-	for (i = 0; i < data->e_shnum; i++){
-		section_header = section_header_start+i;
-		if(section_header->sh_type == 4){
-			return section_header;
-			break;
-		}
-	}
 
-}
 
 //section.rela exsite
 int sectionRelaE(Elf32_Ehdr* data){
@@ -783,6 +717,12 @@ int sectionRelaE(Elf32_Ehdr* data){
 	return e;
 }
 
+///////////string symbole o==0 //string section o==1
+char *get_string_s(Elf32_Ehdr * data, option o){
+	char *stringS = (char*)((void*)data + ((o)?(sectionShstrtab(data)):(sectionStrtab(data)))->sh_offset);
+	return stringS;
+/////////
+/*
 //string symbole 
 char *stringSym(Elf32_Ehdr * data){
 	char *stringSym = (char*)((void*)data + sectionStrtab(data)->sh_offset);
@@ -793,15 +733,15 @@ char *stringSym(Elf32_Ehdr * data){
 char *stringSec(Elf32_Ehdr * data){
 	char *stringSec = (char*)((void*)data + sectionShstrtab(data)->sh_offset);
 	return stringSec;
-}
+}*/
 
 void print_sym(Elf32_Ehdr * data)
 {
 		int i,nb;
 	
-	Elf32_Shdr *symbole = sectionSymtab(data);
+	Elf32_Shdr *symbole = get_section_header(data,2);
 	Elf32_Shdr *string_Sym = sectionStrtab(data);
-	Elf32_Sym *symbole_Start = (Elf32_Sym*)((void*)data + sectionSymtab(data)->sh_offset);
+	Elf32_Sym *symbole_Start = (Elf32_Sym*)((void*)data + get_section_header(data,2)->sh_offset);
 	Elf32_Sym *section_header;
 	char *strSym = stringSym(data);
 	char err_bind[] = "Impossible de lire lien du symbole\n";
@@ -809,8 +749,8 @@ void print_sym(Elf32_Ehdr * data)
 	
 	nb = symbole->sh_size/symbole->sh_entsize;
 
-	printf("Table de symboles << .symtab >> contient %d entrées:\n",nb);
-	printf("   Num:    Valeur Tail Type    Lien   Vis      Ndx Nom\n");
+	printf("%s%d%s\n",(language)?"Symbol table '.symtab' contains ":"Table de symboles « .symtab » contient ",nb,(language)?" entries:":" entrées:");
+	puts((language)?"   Num:    Value  Size Type    Bind   Vis      Ndx Name":"   Num:    Valeur Tail Type    Lien   Vis      Ndx Nom");
 	for (i = 0; i < nb; i++)
     {
 		section_header = symbole_Start+i;
@@ -863,7 +803,7 @@ void print_sym(Elf32_Ehdr * data)
 				strcpy(bind, "HIPROC");
 				break;	
 			default :
-				printf("%s\n", err_bind);
+				printf("%s\n", (language)?"Impossible to read this bind":"Impossible de lire lien du symbole");
 				break;		
 		}	
 		printf("%-6s ",bind);
@@ -906,9 +846,9 @@ void afficherReloc(Elf32_Ehdr *data){
 	Elf32_Shdr *section_sym;
 	char *stringsSec = (char*)((void*)data + sections_string->sh_offset);
 //trouve le offset de la section SHT_RELA et la section SHT_REL
-	section_rela = sectionRela(data);
-	section_rel = sectionRel(data);
-	section_sym = sectionSymtab(data);
+	section_rela = get_section_header(data,4);
+	section_rel = get_section_header(data,9);
+	section_sym = get_section_header(data,2);
 	char *strSym = stringSym(data);
 	
 	char type[25];
@@ -920,7 +860,7 @@ void afficherReloc(Elf32_Ehdr *data){
 		tailleSymRel = section_rel->sh_entsize;
 		nbSymRel = section_rel->sh_size/tailleSymRel;
 
-
+		//A FAIRE
 		printf("Section de relocalisation '.rel.text' à l'adresse de décalage 0x%02x contient %d entrées\n",nb_rel,section_rel->sh_offset);
 		printf("Décalage   Info    Type             Sym.Value   \n");
 		for(i=0;i<nbSymRel;i++){
