@@ -35,6 +35,10 @@ typedef struct Elf_Structure{
 		int nb_Rel;
 
 		int nb_Rela;
+
+		int relE;
+
+		int relaE;
 }Elf32;
 
 #endif

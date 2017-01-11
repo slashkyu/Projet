@@ -34,22 +34,18 @@ int main(int argc, char* argv[])
 		//printf("%02x\n",E.header->e_flags);
 		//E.table_section = get_section_table(E.header);
 		//printf("%02x\n",E.table_section->sh_offset);
-		//initHeader(data);
+		
 		Elf32 *e = initELF(data);
-		afficherHeader(initELF(data));
-		afficherSectionTable(initELF(data));
-		//get_symbole_table(data);
-		//afficherSectionSymbole(Elf32 *e)
+		afficherHeader(e);
+		afficherSectionTable(e);
 		afficherSectionSymbole(e);
-		//get_sectionT(data,2);
-		//get_sectionN(data,".symtab");
+		
+		if(e->relE){
+			afficherSectionRel(e);
+		}
+		
 		libererELF(e);
-		//get_symbole_table(data);
-		//get_header_section(data,2);
-		//get_section_table(initELF(data)->header);
-		//get_section_nb(initELF(data)->header);
-		//puts("AAAAAAAAA");
-		//header(data);							
+			
 		//Unmapping du fichier en mémoire
 		munmap(data, file_info.st_size);
 	}

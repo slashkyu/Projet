@@ -1,9 +1,15 @@
 
-global_main: global_main.o lecture_paq.o
-	gcc -o global_main global_main.o lecture_paq.o
+main: main.o interface.o lecture.o ecriture.o
+	gcc -g -o main main.o interface.o lecture.o ecriture.o
 
-global_main.o: global_main.c
-	gcc -c global_main.c
+main.o: main.c
+	gcc -g -c main.c
 
-lecture_paq.o: lecture_paq.c lecture_paq.h
-	gcc -c lecture_paq.c
+interface.o: interface.c interface.h
+	gcc -g -c interface.c
+
+lecture.o: lecture.c lecture.h interface.h
+	gcc -g -c lecture.c
+
+ecriture.o: ecriture.c ecriture.h interface.h
+	gcc -g -c ecriture.c
