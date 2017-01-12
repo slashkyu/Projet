@@ -15,4 +15,6 @@ void afficherSection(Elf32 *e);
 
 void afficherSectionSymbole(Elf32 *e);
 
+void afficherReloc(Elf32 *e);
+
 #endif

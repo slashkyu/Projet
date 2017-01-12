@@ -591,3 +591,46 @@ void afficherSectionSymbole(Elf32 *e){
 	}
 }
 
+void afficherReloc(Elf32 *e){
+
+	Elf32_Rel *rel_header; unsigned int i, index, rel_off;char type[25];Elf32_Shdr section_header;
+
+	for (index = 0; index < e->nb_Section; index++)
+	{
+		section_header = e->table_section[index];
+
+		if (strcmp(e->string_table_section + section_header.sh_name,".rel.text"))
+			continue;
+		else
+			{rel_off = section_header.sh_offset;break;}
+
+	}
+	printf("Section de relocalisation '.rel.text' à l'adresse de décalage 0x%lx contient %lu entrées:\n", (long unsigned int) rel_off, (long unsigned int) e->nb_Rel);
+	printf(" Offset     Info    Type            Sym.Value   \n");
+	for(i=0;i<e->nb_Rel;i++)
+	{
+		rel_header = e->table_rel + i;
+		printf("%08x  ",(rel_header->r_offset));//ELF32_RINFO macro >>8 <<8
+		printf("%08x ",(ELF32_R_INFO(ELF32_R_SYM(rel_header->r_info),ELF32_R_TYPE(rel_header->r_info))));
+		switch (ELF32_R_TYPE(rel_header->r_info)) 
+		{
+			case 0x1c : 
+				strcpy(type, "R_ARM_CALL");
+				break;
+			case 0x2 : 
+				strcpy(type, "R_ARM_ABS32");
+				break;		
+		} 
+		printf("%-17s ",type);
+
+		printf("%08x \n",(ELF32_R_SYM((rel_header->r_info)>>8)));
+	}
+	puts(" ");
+
+
+}
+
+
+
+
+
