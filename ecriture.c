@@ -602,10 +602,14 @@ void afficherReloc(Elf32 *e){
 		if (strcmp(e->string_table_section + section_header.sh_name,".rel.text"))
 			continue;
 		else
-			{rel_off = section_header.sh_offset;break;}
+		{
+			rel_off = section_header.sh_offset;
+			break;
+		}
 
 	}
-	printf("Section de relocalisation '.rel.text' à l'adresse de décalage 0x%lx contient %lu entrées:\n", (long unsigned int) rel_off, (long unsigned int) e->nb_Rel);
+	printf("Section de relocalisation '.rel.text' à l'adresse de décalage ");
+	printf("0x%lx contient %lu entrées:\n", (long unsigned int) rel_off, (long unsigned int) e->nb_Rel);
 	printf(" Offset     Info    Type            Sym.Value   \n");
 	for(i=0;i<e->nb_Rel;i++)
 	{
