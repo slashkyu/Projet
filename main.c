@@ -10,13 +10,19 @@
 #include "interface.h"
 #include "lecture.h"
 #include "ecriture.h"
-
+#include "fusion.h"
 
 int main(int argc, char* argv[])
 {
+	Elf32 *e2;
+	Elf32 *e;
+
 	Elf32_Ehdr *data;
-	struct stat file_info; Elf32 E;
+	struct stat file_info; 
 	int file_descriptor = open(argv[1], O_RDONLY);
+	Elf32_Ehdr *data2;
+	struct stat file_info2;
+	int file_descriptor2 = open(argv[2], O_RDONLY);
 
 	if (fstat(file_descriptor, &file_info))
 	{ 
@@ -30,27 +36,30 @@ int main(int argc, char* argv[])
 	}
 	else 
 	{	
-		
-		//printf("%02x\n",E.header->e_flags);
-		//E.table_section = get_section_table(E.header);
-		//printf("%02x\n",E.table_section->sh_offset);
-		
-		Elf32 *e = initELF(data);
-		afficherHeader(e);
+		e = initELF(data);
+
 		afficherSectionTable(e);
-		afficherSectionSymbole(e);
-		
-		if(e->relE){
-			afficherSectionRel(e);
-		}
-		
+		e = fusionSectionSize(e,e);
+		e = fusionSectionOffset(e);
+		afficherSectionTable(e);
+
 		libererELF(e);
-			
-		//Unmapping du fichier en mémoire
+		//libererELF(e2);
 		munmap(data, file_info.st_size);
 	}
-	//Fermeture du fichier
+
+	//afficherSectionTable(e);
+	//afficherSectionTable(e2);
+	
+
+	
+
+	
 	close(file_descriptor);
+	//close(file_descriptor2);
+	
+	//Fermeture du fichier
+	
 	return (0);
 
 }

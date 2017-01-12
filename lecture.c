@@ -59,16 +59,21 @@ int sectionE(Elf32_Ehdr * h,int indice){
 Elf32_Shdr *get_sectionN(Elf32_Ehdr * h, char *string){
 	Elf32_Shdr *section_header_start = get_section_table(h);
 	Elf32_Shdr *section_header;
+	//printf("%02x",section_header_start->sh_offset);
 	int i;
 	char *strings = string_section(h);
+	//printf("%s",strings+7);
 	for ( i = 0; i < h->e_shnum; i++){
 		section_header = section_header_start+i;
 		if(strcmp(strings + section_header->sh_name, string)==0){
 			return section_header;
+			//printf("sym%02x",section_header->sh_offset);
 		}
 	}
 	//return NULL;
 }
+
+
 
 Elf32_Shdr *get_string_section(Elf32_Ehdr * h){
 	Elf32_Shdr *section_header_start = get_section_table(h);
@@ -83,11 +88,12 @@ char *string_section(Elf32_Ehdr * h){
 
 Elf32_Shdr *get_string_symbole(Elf32_Ehdr * h){
 	Elf32_Shdr *s = (Elf32_Shdr*)((void*)h + get_sectionN(h,".strtab")->sh_offset);
+	//printf("add1: %02x",s->sh_size);
 	return s;
 }
 
 char *string_symbole(Elf32_Ehdr * h){
-	char *strings = (char*)((void*)h + get_sectionN(h,".strtab")->sh_offset);
+	char *strings = (char*)((void*)h + get_string_symbole(h)->sh_offset);
 	return strings;
 }
 
@@ -128,6 +134,7 @@ int get_rela_nb(Elf32_Ehdr *h){
 Elf32_Ehdr *initHeader(Elf32_Ehdr * h){
 	int i;
 	Elf32_Ehdr *header = malloc(sizeof(Elf32_Ehdr));
+	if(header == NULL) exit(-1);
 	for(i=0;i<EI_NIDENT;i++){
 		header->e_ident[i] = h->e_ident[i];
 	}	
@@ -180,6 +187,8 @@ void initRelaTable(Elf32_Rela *s, Elf32_Rela *d) {
 	d->r_addend = s->r_addend;
 }
 
+//Elf32 *
+
 Elf32 *initELF(Elf32_Ehdr * data){
 	int i,exite;
 
@@ -222,7 +231,7 @@ Elf32 *initELF(Elf32_Ehdr * data){
 	//init rela table
 	Elf32_Rela *rela_header_start = get_rela_table(data);
 	exite = sectionE(data,4);
-	printf("%d\n",exite);
+	//printf("%d\n",exite);
 	e->relaE = exite;
 	if(exite==1){
 		int nbRela = get_rela_nb(data);
@@ -255,9 +264,10 @@ Elf32 *initELF(Elf32_Ehdr * data){
 	for(i; i<10; i++){
 		printf("%s\n",cSym+((get_symbole_table(data)+i)->st_name));
 	}
-
 	//printf("%d\n",exite);
 */
+
+	
 	return e;
 }
 
@@ -269,14 +279,42 @@ void libererELF(Elf32 *e){
 	free(e->table_rel);
 	free(e);
 }
-/*
-Elf32_Shdr *get_section_table2(Elf32_Ehdr * h){
-	Elf32_Shdr *section_header_start = (Elf32_Shdr*)((void*)h + h->e_shoff);
-	Elf32_Shdr *s = section_header_start + h->e_shstrndx;
-	//printf("%02x\n",s->sh_offset);
-	return s;
+
+Elf32* ajouterSection(Elf32* s, Elf32 *d, int indice){
+		d->header->e_shnum ++;
+		d->nb_Section ++;
+		d->header->e_shentsize = d->header->e_shentsize + (s->table_section + indice)->sh_size;
+		d->table_section = realloc(d->table_section, sizeof(Elf32_Shdr) * s->nb_Section);
+		initSectionTable(s->table_section + indice, d->table_section+(d->nb_Section-1));		
+		return d;
 }
-*/
+
+Elf32_Shdr *get_sectionwithName(Elf32 *e, char *string){
+	Elf32_Shdr *section_header;
+	int i;
+	for ( i = 0; i < (e->header)->e_shnum; i++){
+		section_header = e->table_section+i;
+		if(strcmp(e->string_table_section + (e->table_section+i)->sh_name, string)==0){
+			return section_header;
+		}
+	}
+}
+
+char *get_Nameofsection(Elf32 *e, int indice){
+	return e->string_table_section + (e->table_section+indice)->sh_name;
+}
+
+
+Elf32 *ajouterSymbole(Elf32 *s, Elf32 *d, int indice){
+		int nbS = d->nb_Symbole;
+		d->nb_Symbole ++;
+		//Elf32_Shdr *sec;
+		get_sectionwithName(s, ".symtab")->sh_size = get_sectionwithName(s, ".symtab")->sh_size+sizeof(Elf32_Sym);
+		d->table_symbole = realloc(d->table_symbole, sizeof(Elf32_Sym) * d->nb_Symbole);
+		initSymboleTable(s->table_symbole + indice, d->table_symbole+(d->nb_Symbole-1));		
+		return d;
+}
+
 /*
 int main(int argc, char* argv[])
 {
