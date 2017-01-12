@@ -85,7 +85,7 @@ Elf32_Shdr *ordre_offset(Elf32_Ehdr *data){
 
 
 
-Elf32_Shdr *calcul_offset(Elf32 e1, Elf32_Shdr *ordered, int size, Elf32 *e2){
+Elf32_Shdr *calcul_offset(Elf32 *e1, Elf32_Shdr *ordered, int size, Elf32 *e2){
 
                 int i, offset=0;
                 Elf32_Shdr *section_header1, *section_header2;
@@ -94,7 +94,7 @@ Elf32_Shdr *calcul_offset(Elf32 e1, Elf32_Shdr *ordered, int size, Elf32 *e2){
                         section_header1 = ordered + i;
                         section_header1->sh_offset=offset;
 
-                        section_header2=find_section(e2,retrouver_nom(e1, e2->string_table_section + section_header1->sh_name)); //retrouver la section correspondante si elle existe
+                        section_header2=find_section(e2,e1->string_table_section + section_header1->sh_name); //retrouver la section correspondante si elle existe
 
                         if(section_header2 != NULL){
                         offset=section_header1->sh_offset + section_header1->sh_size + section_header2->sh_size ;
