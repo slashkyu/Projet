@@ -10,17 +10,26 @@
 #include <sys/mman.h>
 #include <elf.h>
 #include <math.h>
+#include "lecture.h"
 #include "interface.h"
 
 
 
+int inserer(int element_a_inserer, int tab[], int taille_gauche);
 
-Elf32_Shdr *find_section(Elf32_Ehdr* data, char *string);
+Elf32_Shdr *ordre_offset(Elf32_Ehdr *data);
 
-Elf32 traitement(Elf32_Ehdr *data1, Elf32_Ehdr *data2, Elf32_Shdr *section_header_start1, Elf32_Shdr *section_header_start2, char * string1, char* string2, int max);
-void fusion_section_table(Elf32_Ehdr * data1, Elf32_Ehdr *data2);
+Elf32_Shdr *calcul_offset(Elf32 e1, Elf32_Shdr *ordered, int size, Elf32 *e2);
 
-void process ( Elf32_Ehdr *data1, Elf32_Ehdr *data2);
+Elf32_Shdr *find_section(Elf32 *e, char *string);
+
+void print_flag(Elf32_Word flags);
+
+void print_table(Elf32 *Elf);
+
+Elf32 *traitement(Elf32 *e1, Elf32 *e2);
+
+void fusion_section_table(Elf32 *e1, Elf32 *e2);
 
 
 #endif
