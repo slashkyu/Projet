@@ -266,7 +266,14 @@ Elf32 *initELF(Elf32_Ehdr * data){
 	}
 	//printf("%d\n",exite);
 */
-
+	//init tout les sections (contenue)
+	e->s_h_s = get_section_table(data);
+	int grom,z;Elf32_Shdr s_h;
+	for (grom=0;grom<nbSec;grom++)
+	{
+		s_h = e->s_h_s[grom];
+		e->contenue_section[grom]=(unsigned char*)((void*)data + s_h.sh_offset);
+	}
 	
 	return e;
 }
@@ -321,7 +328,6 @@ int main(int argc, char* argv[])
 	Elf32_Ehdr *data;
 	struct stat file_info; Elf32 E;
 	int file_descriptor = open(argv[1], O_RDONLY);
-
 	if (fstat(file_descriptor, &file_info))
 	{
 		exit(1);
@@ -348,6 +354,5 @@ int main(int argc, char* argv[])
 	//Fermeture du fichier
 	close(file_descriptor);
 	return (0);
-
 }
 */

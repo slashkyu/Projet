@@ -371,54 +371,16 @@ static const char *get_section_type_name (unsigned int sh_type)
     }
 }
 
-static const char *get_flag(int flags){
-	//char* str_flag;
-	char str_flags[4] = "   "; char *str_flag = str_flags;
-		if (flags & (1u << 0)){	//écriture
-			strcpy(str_flag,"W");str_flag++;
-		}
-		if (flags & (1u << 1)){	//allocation
-			strcpy(str_flag,"A");str_flag++;
-		}
-		if (flags & (1u << 2)){	//exécution
-			strcpy(str_flag,"X");str_flag++;
-		}
-		if (flags & (1u << 4)){	//fusion
-			strcpy(str_flag,"M");str_flag++;
-		}
-		if (flags & (1u << 5)){	//chaînes
-			strcpy(str_flag,"S");str_flag++;
-		}
-		if (flags & (1u << 6)){	//info
-			strcpy(str_flag,"I");str_flag++;
-		}
-		if (flags & (1u << 7)){	//ordre des liens
-			strcpy(str_flag,"L");str_flag++;
-		}
-		if (flags & (1u << 8)){	//os nonconforming
-			strcpy(str_flag,"O");str_flag++;
-		}
-		if (flags & (1u << 9)){	//groupe
-			strcpy(str_flag,"G");str_flag++;
-		}
-		if (flags & (1u << 10)){	//TLS
-			strcpy(str_flag,"T");str_flag++;
-		}
-		return str_flags;
-		//return str_flag;
-}
-
 void afficherHeader(Elf32 *e){
 
 	int index;
+
 	//ELF Header
 	puts("En-tête ELF:");
 	//Magic
 	printf("%s","  Magique:   ");
 	for (index = 0; index < EI_NIDENT; index++)
-	{
 		printf("%2.2x ", (e->header)->e_ident[index]);
-	}
 	puts(" ");
 	//Class
 	printf("  Classe:                            %s\n", tab_classe[(e->header)->e_ident[4]]);
@@ -462,51 +424,32 @@ void afficherHeader(Elf32 *e){
  
 void afficherSectionTable(Elf32 *e){
 	
-	//Elf32_Ehdr * elf_header; elf_header= e->header;
-	// on recupere un pointeur sur le premier header de section, avec le offset correspondant
-	Elf32_Shdr *section_header_start=e->table_section;//get_section_table(e->header);
-	//Elf32_Shdr *section_header_start = (Elf32_Shdr*)((void*)elf_header + elf_header->e_shoff);
-	// on retrouve la string table avec le nom des sections
-	//Elf32_Shdr sections_string = section_header_start[(e->header)->e_shstrndx];
-	// on recupere un pointeur sur le debut de la section et donc sur la premiere chaine
-	//char *strings = string_section(e->header);
-	//char *strings = (char*)((void*)e->header + sections_string.sh_offset);
-	// pour stoquer chaque section
-	//char *strings = e->string_table_section + section_header.sh_name)
-
-
-	Elf32_Shdr section_header; 
-
-	unsigned int i;	
-
+	Elf32_Shdr section_header;//Elf32_Shdr *section_header_start=e->table_section;
+	unsigned int index;
 
 	printf("Il y a %d en-têtes de section, débutant à l'adresse de décalage 0x%02x:\n", e->nb_Section, (e->header)->e_shoff);
-	
 	printf("  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al\n");
 	//Affichage du tableau
-	for (i = 0; i < e->nb_Section; i++)
+	for (index = 0; index < e->nb_Section; index++)
 	{
 		// on recupere le header de section courrant
-		section_header = section_header_start[i];
+		section_header = e->table_section[index];//section_header = section_header_start[i];
 		//Nr
-		printf("  [%2u]",i);
+		printf("  [%2u]",index);
 		//Name
-		//printf(" %-17.17s"," ");
 		printf(" %-17.17s", e->string_table_section + section_header.sh_name);
-		//printf(" %-17.17s", strings + section_header.sh_name);
 		//Type
-		//printf(" %-15.15s");//printf(" %-15.15x",section_header.sh_type);
 		printf(" %-15.15s",get_section_type_name(section_header.sh_type));
 		//Addr
 		printf(" %08x", section_header.sh_addr);
 		//Off
-		printf(" %6.6lx", section_header.sh_offset);
+		printf(" %6.6lx", (long unsigned int) section_header.sh_offset);
 		//Size
-		printf(" %6.6lx", section_header.sh_size);
+		printf(" %6.6lx", (long unsigned int) section_header.sh_size);
 		//ES
-		printf(" %2.2lx", section_header.sh_entsize);
+		printf(" %2.2lx", (long unsigned int) section_header.sh_entsize);
 		//Flg
-		 		char str_flags[4] = "   "; char *str_flag = str_flags;
+		char str_flags[4] = "   "; char *str_flag = str_flags;
 		if (section_header.sh_flags & (1u << 0)){	//écriture
 			strcpy(str_flag,"W");str_flag++;
 		}
@@ -538,76 +481,117 @@ void afficherSectionTable(Elf32 *e){
 			strcpy(str_flag,"T");str_flag++;
 		}
 		printf(" %3s",str_flags);
-		//printf(" %3s",get_flag(section_header.sh_flags));
 		//Lk
 		printf(" %2d", section_header.sh_link);
 		//Inf
 		printf(" %3d", section_header.sh_info);
 		//Al
 		printf(" %2d", section_header.sh_addralign);
-
 		puts(" ");
 	}
-    puts("Clé des fanions:\nW (écriture), A (allocation), X (exécution), M (fusion), S (chaînes)");
+    	puts("Clé des fanions:\nW (écriture), A (allocation), X (exécution), M (fusion), S (chaînes)");
 	puts("I (info), L (ordre des liens), G (groupe), T (TLS), E (exclu), x (inconnu)");
 	puts("O (traiterment additionnel requis pour l'OS) o (spécifique à l'OS), p (spécifique au processeur)");	
 
 }
 
+void afficherSection(Elf32 *e)
+{
+	//Elf32_Shdr *s_h_s = get_section_table(e->header);
+	int grom,z,k,l;Elf32_Shdr s_h;
+	for (grom=0;grom<e->nb_Section;grom++)
+	{
+			s_h = e->s_h_s[grom];
+			z=0;printf("  Ox%08x",z);
+			while(z < s_h.sh_size) //boucle de récupération du contenu
+			{
+				
+				if (z % 4 == 0)	//Formatage
+				{
+					printf(" ");
+				}
+				printf("%02x", e->contenue_section[grom][z]);
+				z++;
+				if (z % 16 == 0)	//Formatage
+				{
+					printf(" ");printf("||%d||\n", z);
+					for (k=z-16;k<z;k++)
+					{
+						if (32 <= e->contenue_section[grom][k] && e->contenue_section[grom][k] <= 126)
+							printf("%c",e->contenue_section[grom][k]);
+						else
+							printf(".");
+					}	
+				}
+				else if (z == s_h.sh_size && z % 16 != 0)	//Formatage
+				{
+					for (l=z-1;z % l != 0;l--);
+					/*{
+						printf("   ");
+						if (z % 4 == 0)	//Formatage
+							printf(" ");
+					}*/printf("||%d||", z);printf("||%d||\n", l);
+					for (k=l;k<z;k++)
+					{
+						if (32 <= e->contenue_section[grom][k] && e->contenue_section[grom][k] <= 126)
+							printf("%c",e->contenue_section[grom][k]);
+						else
+							printf(".");
+					}
+				}	
+				if (z % 16 == 0 && z < s_h.sh_size)	//Formatage
+				{
+			
+					printf("\n  Ox%08x",z);
+				}
+			}
+			puts(" ");puts(" ");
+	}
+}
+
 
  void afficherSectionSymbole(Elf32 *e){
-	int i, type, bind;
+	
+	unsigned int i, type, bind;
+
 	printf("Table de symboles « .symtab » contient %d entrées:\n",e->nb_Symbole);
 	printf("   Num:    Valeur Tail Type    Lien   Vis      Ndx Nom\n");
 	for (i = 0; i < e->nb_Symbole; i++){
+		//Num
 		printf("%6d: ",i);
-
-		//affichage de la value
+		//Valeur
 		printf("%08x ",(e->table_symbole + i)->st_value);
-
-		//affichage de la taille
+		//Tail
 		printf("%5d ",(e->table_symbole + i)->st_size);
-
 		//Type
 		type = ELF32_ST_TYPE((e->table_symbole + i)->st_info);
-		if(type == 13) { 
+		if(type == 13)
 			printf("%-7s ", tab_type_sym[5]);
-		}	
-		else if(type == 14 ){ 
+		else if(type == 14 )
 			printf("%-7s ", tab_type_sym[6]);
-		}
-		else {
+		else
 			printf("%-7s ", tab_type_sym[type]);
-		}
-
-		//affichage du lien
+		//Lien
 		bind = ELF32_ST_BIND((e->table_symbole + i)->st_info);
-		if( type == 13) { 
+		if( type == 13)
 			printf("%-7s", tab_type_sym[3]);
-		}	
-		else if(type == 15 ){ 
+		else if(type == 15 )
 			printf("%-7s", tab_type_sym[4]);
-		}
-		else {
+		else
 			printf("%-7s", tab_lien_sym[bind]);
-		}
-
-
-		if((e->table_symbole + i)->st_other == 0){
+		//Vis
+		if((e->table_symbole + i)->st_other == 0)
 			printf("DEFAULT ");
-		}
-
-		if((e->table_symbole + i)->st_shndx == 0){
+		//Ndx
+		if((e->table_symbole + i)->st_shndx == 0)
 			printf(" UND ");
-		}
-		else if((e->table_symbole + i)->st_shndx == 0xfff1){
+		else if((e->table_symbole + i)->st_shndx == 0xfff1)
 			printf(" ABS ");
-		}
-		else{
+		else
 			printf(" %3x ",(e->table_symbole + i)->st_shndx);
-		}
-		printf("%s \n",(e->string_table_symbole)+(e->table_symbole + i)->st_name);
-
+		//Nom
+		printf("%s",(e->string_table_symbole)+(e->table_symbole + i)->st_name);
+		puts(" ");
 	}
 } 
 

@@ -27,6 +27,10 @@ typedef struct Elf_Structure{
 		char* string_table_section;
 		//pointeur sur string table de symbole
 		char* string_table_symbole;
+
+		unsigned char* contenue_section[2048];
+
+		Elf32_Shdr *s_h_s;//Secion Header Start pour void afficherSection(Elf32 *e)
 		
 		int nb_Section;
 
