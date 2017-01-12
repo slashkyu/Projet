@@ -19,7 +19,7 @@ int inserer(int element_a_inserer, int tab[], int taille_gauche);
 
 Elf32_Shdr *ordre_offset(Elf32_Ehdr *data);
 
-Elf32_Shdr *calcul_offset(Elf32 e1, Elf32_Shdr *ordered, int size, Elf32 *e2);
+Elf32_Shdr *calcul_offset(Elf32 *e1, Elf32_Shdr *ordered, int size, Elf32 *e2);
 
 Elf32_Shdr *find_section(Elf32 *e, char *string);
 
