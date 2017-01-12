@@ -59,7 +59,7 @@ int sectionE(Elf32_Ehdr * h,int indice){
 Elf32_Shdr *get_sectionN(Elf32_Ehdr * h, char *string){
 	Elf32_Shdr *section_header_start = get_section_table(h);
 	Elf32_Shdr *section_header;
-	//printf("%02x",section_header_start->sh_offset);
+	printf("%02x",section_header_start->sh_offset);
 	int i;
 	char *strings = string_section(h);
 	//printf("%s",strings+7);
@@ -86,14 +86,18 @@ char *string_section(Elf32_Ehdr * h){
 	return strings;
 }
 
+
+
+
 Elf32_Shdr *get_string_symbole(Elf32_Ehdr * h){
 	Elf32_Shdr *s = (Elf32_Shdr*)((void*)h + get_sectionN(h,".strtab")->sh_offset);
-	//printf("add1: %02x",s->sh_size);
+	printf("add1: %02x",s->sh_offset);
 	return s;
 }
 
+
 char *string_symbole(Elf32_Ehdr * h){
-	char *strings = (char*)((void*)h + get_string_symbole(h)->sh_offset);
+	char *strings = (char*)((void*)h + get_sectionN(h,".strtab")->sh_offset);
 	return strings;
 }
 
@@ -250,7 +254,7 @@ Elf32 *initELF(Elf32_Ehdr * data){
 	//init string section
 	char* cSec = string_section(data);
 	e->string_table_section = cSec;
-/*
+	/*
 	for(int i; i<10; i++){
 		printf("%s\n",cSec+((get_section_table(data)+i)->sh_name));
 	}
@@ -259,14 +263,14 @@ Elf32 *initELF(Elf32_Ehdr * data){
 
 	//init string symbole
 	char* cSym = string_symbole(data);
+
 	e->string_table_symbole = cSym;
 /*
 	for(i; i<10; i++){
 		printf("%s\n",cSym+((get_symbole_table(data)+i)->st_name));
 	}
-	//printf("%d\n",exite);
 */
-	//init tout les sections (contenue)
+	//printf("%d\n",exite);
 	e->s_h_s = get_section_table(data);
 	int grom,z;Elf32_Shdr s_h;
 	for (grom=0;grom<nbSec;grom++)
@@ -274,6 +278,9 @@ Elf32 *initELF(Elf32_Ehdr * data){
 		s_h = e->s_h_s[grom];
 		e->contenue_section[grom]=(unsigned char*)((void*)data + s_h.sh_offset);
 	}
+
+	return e;
+
 	
 	return e;
 }
@@ -287,7 +294,7 @@ void libererELF(Elf32 *e){
 	free(e);
 }
 
-Elf32* ajouterSection(Elf32* s, Elf32 *d, int indice){
+Elf32 *ajouterSection(Elf32* s, Elf32 *d, int indice){
 		d->header->e_shnum ++;
 		d->nb_Section ++;
 		d->header->e_shentsize = d->header->e_shentsize + (s->table_section + indice)->sh_size;
@@ -311,6 +318,9 @@ char *get_Nameofsection(Elf32 *e, int indice){
 	return e->string_table_section + (e->table_section+indice)->sh_name;
 }
 
+char *get_Nameofsymbole(Elf32 *e, int indice){
+	return e->string_table_symbole + (e->table_symbole+indice)->st_name;
+}
 
 Elf32 *ajouterSymbole(Elf32 *s, Elf32 *d, int indice){
 		int nbS = d->nb_Symbole;
@@ -322,37 +332,3 @@ Elf32 *ajouterSymbole(Elf32 *s, Elf32 *d, int indice){
 		return d;
 }
 
-/*
-int main(int argc, char* argv[])
-{
-	Elf32_Ehdr *data;
-	struct stat file_info; Elf32 E;
-	int file_descriptor = open(argv[1], O_RDONLY);
-	if (fstat(file_descriptor, &file_info))
-	{
-		exit(1);
-	}
-	//Verification du chargement en memoire du fichier
-	//void *mmap(void *addr, size_t len, int protection, int flags, int fildes, off_t off);
-	else if ((data = get_header(file_info, file_descriptor)) == MAP_FAILED)
-	{
-		exit(1);
-	}
-	else 
-	{	
-		
-		//printf("%02x\n",E.header->e_flags);
-		//E.table_section = get_section_table(E.header);
-		//printf("%02x\n",E.table_section->sh_offset);
-		initELF(data);
-		initHeader(data);
-		//puts("AAAAAAAAA");
-		//header(data);							
-		//Unmapping du fichier en mémoire
-		munmap(data, file_info.st_size);
-	}
-	//Fermeture du fichier
-	close(file_descriptor);
-	return (0);
-}
-*/

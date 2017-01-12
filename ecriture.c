@@ -504,15 +504,14 @@ void afficherSection(Elf32 *e)
 			s_h = e->s_h_s[grom];
 			z=0;printf("  Ox%08x",z);
 			while(z < s_h.sh_size) //boucle de récupération du contenu
-			{
-				
+			{	
 				if (z % 4 == 0)	//Formatage
 				{
 					printf(" ");
 				}
 				printf("%02x", e->contenue_section[grom][z]);
 				z++;
-				if (z % 16 == 0)	//Formatage
+				/*if (z % 16 == 0)	//Formatage
 				{
 					printf(" ");printf("||%d||\n", z);
 					for (k=z-16;k<z;k++)
@@ -526,11 +525,7 @@ void afficherSection(Elf32 *e)
 				else if (z == s_h.sh_size && z % 16 != 0)	//Formatage
 				{
 					for (l=z-1;z % l != 0;l--);
-					/*{
-						printf("   ");
-						if (z % 4 == 0)	//Formatage
-							printf(" ");
-					}*/printf("||%d||", z);printf("||%d||\n", l);
+					printf("||%d||", z);printf("||%d||\n", l);
 					for (k=l;k<z;k++)
 					{
 						if (32 <= e->contenue_section[grom][k] && e->contenue_section[grom][k] <= 126)
@@ -538,7 +533,7 @@ void afficherSection(Elf32 *e)
 						else
 							printf(".");
 					}
-				}	
+				}*/
 				if (z % 16 == 0 && z < s_h.sh_size)	//Formatage
 				{
 			
@@ -550,10 +545,10 @@ void afficherSection(Elf32 *e)
 }
 
 
- void afficherSectionSymbole(Elf32 *e){
-	
-	unsigned int i, type, bind;
 
+void afficherSectionSymbole(Elf32 *e){
+	printf("-----SYMBOLE-----\n");
+	unsigned int i, type, bind;
 	printf("Table de symboles « .symtab » contient %d entrées:\n",e->nb_Symbole);
 	printf("   Num:    Valeur Tail Type    Lien   Vis      Ndx Nom\n");
 	for (i = 0; i < e->nb_Symbole; i++){
@@ -562,7 +557,7 @@ void afficherSection(Elf32 *e)
 		//Valeur
 		printf("%08x ",(e->table_symbole + i)->st_value);
 		//Tail
-		printf("%5d ",(e->table_symbole + i)->st_size);
+		printf("%5d ",(e->table_symbole + i)->st_size);	
 		//Type
 		type = ELF32_ST_TYPE((e->table_symbole + i)->st_info);
 		if(type == 13)
@@ -571,8 +566,8 @@ void afficherSection(Elf32 *e)
 			printf("%-7s ", tab_type_sym[6]);
 		else
 			printf("%-7s ", tab_type_sym[type]);
-		//Lien
 		bind = ELF32_ST_BIND((e->table_symbole + i)->st_info);
+		//Lien
 		if( type == 13)
 			printf("%-7s", tab_type_sym[3]);
 		else if(type == 15 )
@@ -591,7 +586,8 @@ void afficherSection(Elf32 *e)
 			printf(" %3x ",(e->table_symbole + i)->st_shndx);
 		//Nom
 		printf("%s",(e->string_table_symbole)+(e->table_symbole + i)->st_name);
+
 		puts(" ");
 	}
-} 
+}
 

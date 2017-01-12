@@ -51,6 +51,8 @@ Elf32_Shdr *get_sectionwithName(Elf32 *e, char *string);
 
 char *get_Nameofsection(Elf32 *e, int indice);
 
+char *get_Nameofsymbole(Elf32 *e, int indice);
+
 Elf32 *ajouterSection(Elf32* s, Elf32 *d, int indice);
 
 Elf32_Shdr *get_section_symbole2(Elf32_Ehdr * h);
