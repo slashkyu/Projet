@@ -496,51 +496,51 @@ void afficherSectionTable(Elf32 *e){
 }
 
 void afficherSection(Elf32 *e)
-{
-	//Elf32_Shdr *s_h_s = get_section_table(e->header);
+{	
+	puts("-----HEXDUMP-----");	//Elf32_Shdr *s_h_s = get_section_table(e->header);
 	int grom,z,k,l;Elf32_Shdr s_h;
 	for (grom=0;grom<e->nb_Section;grom++)
 	{
 			s_h = e->s_h_s[grom];
-			z=0;printf("  Ox%08x",z);
-			while(z < s_h.sh_size) //boucle de récupération du contenu
-			{	
-				if (z % 4 == 0)	//Formatage
-				{
-					printf(" ");
-				}
-				printf("%02x", e->contenue_section[grom][z]);
-				z++;
-				/*if (z % 16 == 0)	//Formatage
-				{
-					printf(" ");printf("||%d||\n", z);
-					for (k=z-16;k<z;k++)
+			if (s_h.sh_size == 0)
+				fprintf(stderr, "Dans ce fichier il n'y a pas de section « %s »\n\n", e->string_table_section + s_h.sh_name);
+			else
+			{	printf("Vidange hexadécimale de la section « %s »:\n",e->string_table_section + s_h.sh_name);
+				z=0;printf("  Ox%08x",z);
+				while(z < s_h.sh_size) //boucle de récupération du contenu
+				{	
+					if (z % 4 == 0)	//Formatage
+						printf(" ");
+					printf("%02x", e->contenue_section[grom][z]);
+					z++;
+					/*if (z % 16 == 0)	//Formatage
 					{
-						if (32 <= e->contenue_section[grom][k] && e->contenue_section[grom][k] <= 126)
-							printf("%c",e->contenue_section[grom][k]);
-						else
+						printf(" ");printf("||%d||\n", z);
+						for (k=z-16;k<z;k++)
+						{
+							if (32 <= e->contenue_section[grom][k] && e->contenue_section[grom][k] <= 126)
+								printf("%c",e->contenue_section[grom][k]);
+							else
 							printf(".");
-					}	
-				}
-				else if (z == s_h.sh_size && z % 16 != 0)	//Formatage
-				{
-					for (l=z-1;z % l != 0;l--);
-					printf("||%d||", z);printf("||%d||\n", l);
-					for (k=l;k<z;k++)
-					{
-						if (32 <= e->contenue_section[grom][k] && e->contenue_section[grom][k] <= 126)
-							printf("%c",e->contenue_section[grom][k]);
-						else
-							printf(".");
+						}	
 					}
+					else if (z == s_h.sh_size && z % 16 != 0)	//Formatage
+					{
+						for (l=z-1;z % l != 0;l--);
+						printf("||%d||", z);printf("||%d||\n", l);
+						for (k=l;k<z;k++)
+						{
+							if (32 <= e->contenue_section[grom][k] && e->contenue_section[grom][k] <= 126)
+								printf("%c",e->contenue_section[grom][k]);
+							else
+								printf(".");
+						}
 				}*/
 				if (z % 16 == 0 && z < s_h.sh_size)	//Formatage
-				{
-			
 					printf("\n  Ox%08x",z);
 				}
+				puts(" ");puts(" ");
 			}
-			puts(" ");puts(" ");
 	}
 }
 
