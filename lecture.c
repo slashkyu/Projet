@@ -231,21 +231,6 @@ Elf32 *initELF(Elf32_Ehdr * data){
 			initRelTable(rel_header_start+i, e->table_rel + i);
 		}
 	}
-	/*
-	//init rela table
-	Elf32_Rela *rela_header_start = get_rela_table(data);
-	exite = sectionE(data,4);
-	//printf("%d\n",exite);
-	e->relaE = exite;
-	if(exite==1){
-		int nbRela = get_rela_nb(data);
-		e->nb_Rela = nbRela;
-		e->table_rela = malloc(sizeof(Elf32_Rela) * nbRela);
-		for (i = 0; i < nbRela; i++){
-			initRelaTable(rela_header_start+i, e->table_rela + i);
-		}
-	}
-	*/
 	//valgrind
 	//init nb section
 	e->nb_Section = nbSec;
@@ -254,22 +239,11 @@ Elf32 *initELF(Elf32_Ehdr * data){
 	//init string section
 	char* cSec = string_section(data);
 	e->string_table_section = cSec;
-	/*
-	for(int i; i<10; i++){
-		printf("%s\n",cSec+((get_section_table(data)+i)->sh_name));
-	}
-*/
-	//printf("%d\n",exite);
-
 	//init string symbole
 	char* cSym = string_symbole(data);
 
 	e->string_table_symbole = cSym;
-/*
-	for(i; i<10; i++){
-		printf("%s\n",cSym+((get_symbole_table(data)+i)->st_name));
-	}
-*/
+
 	//printf("%d\n",exite);
 	e->s_h_s = get_section_table(data);
 	int grom,z;Elf32_Shdr s_h;
