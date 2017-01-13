@@ -1,0 +1,6 @@
+
+BUGS : 
+
+Dans ecriture.c la foction afficherReloc le champs Val.-sym ne s'affiche pas correctement toujours.
+
+Dans fusion.c on n'a pas fait le mis-à-jour de nom dans la table des sections fusionnées et la table des symboles fusionnées.
