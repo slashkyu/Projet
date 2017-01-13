@@ -586,7 +586,7 @@ void afficherReloc(Elf32 *e){
 	for(i=0;i<e->nb_Rel;i++)
 	{
 		rel_header = e->table_rel + i;
-		printf("%08x  ",(rel_header->r_offset));//ELF32_RINFO macro >>8 <<8
+		printf("%08x  ",(rel_header->r_offset));
 		printf("%08x ",(ELF32_R_INFO(ELF32_R_SYM(rel_header->r_info),ELF32_R_TYPE(rel_header->r_info))));
 		switch (ELF32_R_TYPE(rel_header->r_info)) 
 		{
