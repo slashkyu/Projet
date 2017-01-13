@@ -8,12 +8,9 @@
 #include <sys/mman.h>
 #include <elf.h>
 #include "interface.h"
-//#include "lecture_paq.h" 
 #include "ecriture.h"
 
 
-
-//char *tab_type_section[14] = {"NULL", "PROGBITS", "SYMTAB" , "STRTAB", "RELA", "HASH", "DYNAMIC", "NOTE", "NOBITS", "REL", "SHLIB", "DYNSYM", "PROCSPECSEM", "APPINDEX"};
 
 char * tab_classe[3]={"Aucun","ELF32","ELF64",};
 
@@ -57,8 +54,7 @@ static const char * get_osabi_name (unsigned int osabi)
 
 static char *get_machine_name (unsigned e_machine)
 {
-  static char buff[64]; /* XXX */
-
+  static char buff[64]; 
   switch (e_machine)
     {
     case EM_NONE:		return "None";
@@ -433,7 +429,7 @@ void afficherSectionTable(Elf32 *e){
 	for (index = 0; index < e->nb_Section; index++)
 	{
 		// on recupere le header de section courrant
-		section_header = e->table_section[index];//section_header = section_header_start[i];
+		section_header = e->table_section[index];
 		//Nr
 		printf("  [%2u]",index);
 		//Name
@@ -513,31 +509,8 @@ void afficherSection(Elf32 *e)
 						printf(" ");
 					printf("%02x", e->contenue_section[grom][z]);
 					z++;
-					/*if (z % 16 == 0)	//Formatage
-					{
-						printf(" ");printf("||%d||\n", z);
-						for (k=z-16;k<z;k++)
-						{
-							if (32 <= e->contenue_section[grom][k] && e->contenue_section[grom][k] <= 126)
-								printf("%c",e->contenue_section[grom][k]);
-							else
-							printf(".");
-						}	
-					}
-					else if (z == s_h.sh_size && z % 16 != 0)	//Formatage
-					{
-						for (l=z-1;z % l != 0;l--);
-						printf("||%d||", z);printf("||%d||\n", l);
-						for (k=l;k<z;k++)
-						{
-							if (32 <= e->contenue_section[grom][k] && e->contenue_section[grom][k] <= 126)
-								printf("%c",e->contenue_section[grom][k]);
-							else
-								printf(".");
-						}
-				}*/
-				if (z % 16 == 0 && z < s_h.sh_size)	//Formatage
-					printf("\n  Ox%08x",z);
+					if (z % 16 == 0 && z < s_h.sh_size)	//Formatage
+						printf("\n  Ox%08x",z);
 				}
 				puts(" ");puts(" ");
 			}
