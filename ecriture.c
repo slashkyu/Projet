@@ -97,8 +97,7 @@ static char *get_machine_name (unsigned e_machine)
       return buff;
     }
 }
-static void
-decode_ARM_machine_flags (unsigned e_flags, char buf[])
+static void decode_ARM_machine_flags (unsigned e_flags, char buf[])
 {
   unsigned eabi;
   int unknown = 0;
