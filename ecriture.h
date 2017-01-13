@@ -16,7 +16,7 @@ static char *get_machine_name (unsigned e_machine);
 static void decode_ARM_machine_flags (unsigned e_flags, char buf[]);
 static char *get_machine_flags (unsigned e_flags, unsigned e_machine);
 //Renvoie le nom de section à partir de son code
-static const char *get_section_type_name (unsigned int sh_type)
+static const char *get_section_type_name (unsigned int sh_type);
 //FONCTIONS PRINCIPALES d'AFFICHAGE
 //Affiche l'en-tête de la structure
 void afficherHeader(Elf32 *e);
