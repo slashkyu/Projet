@@ -418,8 +418,8 @@ void afficherHeader(Elf32 *e){
 }
  
 void afficherSectionTable(Elf32 *e){
-	
-	Elf32_Shdr section_header;//Elf32_Shdr *section_header_start=e->table_section;
+	puts("\n-----HEADER-----");
+	Elf32_Shdr section_header;
 	unsigned int index;
 
 	printf("Il y a %d en-têtes de section, débutant à l'adresse de décalage 0x%02x:\n", e->nb_Section, (e->header)->e_shoff);
@@ -492,7 +492,7 @@ void afficherSectionTable(Elf32 *e){
 
 void afficherSection(Elf32 *e)
 {	
-	puts("-----HEXDUMP-----");	//Elf32_Shdr *s_h_s = get_section_table(e->header);
+	puts("\n-----HEXDUMP-----");	//Elf32_Shdr *s_h_s = get_section_table(e->header);
 	int grom,z,k,l;Elf32_Shdr s_h;
 	for (grom=0;grom<e->nb_Section;grom++)
 	{
@@ -519,7 +519,7 @@ void afficherSection(Elf32 *e)
 
 
 void afficherSectionSymbole(Elf32 *e){
-	printf("-----SYMBOLE-----\n");
+	printf("\n-----SYMBOLE-----\n");
 	unsigned int i, type, bind;
 	printf("Table de symboles « .symtab » contient %d entrées:\n",e->nb_Symbole);
 	printf("   Num:    Valeur Tail Type    Lien   Vis      Ndx Nom\n");
@@ -564,7 +564,7 @@ void afficherSectionSymbole(Elf32 *e){
 }
 
 void afficherReloc(Elf32 *e){
-
+	printf("\n-----RELOC-----\n");
 	Elf32_Rel *rel_header; unsigned int i, index, rel_off;char type[25];Elf32_Shdr section_header;
 
 	for (index = 0; index < e->nb_Section; index++)
